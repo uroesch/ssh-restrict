@@ -8,7 +8,7 @@ name: gitlab-sync
 on:
   push:
   delete:
-  pull_requests:
+  pull_request:
     types:
       - closed
 
