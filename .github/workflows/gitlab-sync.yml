@@ -6,9 +6,9 @@
 name: gitlab-sync
 
 on:
-  - push
-  - delete
-  - pull_requests:
+  push:
+  delete:
+  pull_requests:
     types:
       - closed
 
