@@ -1,0 +1,130 @@
+# -----------------------------------------------------------------------------
+# Run OS compatibilty tests
+# Author: Urs Roesch https://github.com/uroesch
+# Version: 0.1.0
+# -----------------------------------------------------------------------------
+name: os-compatibility
+
+on:
+  push:
+    branches:
+    - workflow/*
+  pull_request:
+    branches:
+    - master
+    - main 
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # Debian Derivates
+  # ---------------------------------------------------------------------------
+  debian:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.name }}:${{ matrix.version }}
+    strategy:
+      matrix:
+        include:
+          - { name: ubuntu,  version: 16.04,  python: python }
+          - { name: ubuntu,  version: 18.04,  python: python }
+          - { name: ubuntu,  version: 20.04,  python: python3 }
+          - { name: ubuntu,  version: 22.04,  python: python3 }
+          - { name: debian,  version: 10,     python: python3 }
+          - { name: debian,  version: 11,     python: python3 }
+          - { name: debian,  version: 12,     python: python3 }
+
+    steps:
+    - name: Install dependencies
+      shell: bash 
+      run: |
+        apt-get update
+        apt-get install -y ${{ matrix.python }}-pytest
+        
+    - name: Setup alternative symlink
+      if: matrix.python == 'python3'
+      shell: bash
+      run: >
+        update-alternatives 
+        --install /usr/bin/python python 
+        /usr/bin/${{ matrix.python }}
+        10
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Test ssh-restrict
+      shell: bash
+      run: ${{ matrix.python }} -m pytest test/test.py
+
+  # ---------------------------------------------------------------------------
+  # Redhat Derivates
+  # ---------------------------------------------------------------------------
+  redhat:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.name }}:${{ matrix.version }}
+    strategy:
+      matrix:
+        include:
+          - { name: centos,      version: 7,  python: python }
+          - { name: rockylinux,  version: 8,  python: python3 }
+
+    steps:
+    - name: Install dependencies
+      shell: bash 
+      run: yum install -y ${{ matrix.python }}-pytest ${{ matrix.python }}
+
+    - name: Setup alternative symlink
+      if: matrix.python == 'python3'
+      shell: bash
+      run: alternatives --set python /usr/bin/python3
+        
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Test ssh-restrict
+      shell: bash
+      run: ${{ matrix.python }} -m pytest test/test.py
+
+  # ---------------------------------------------------------------------------
+  # SUSE Derivates
+  # ---------------------------------------------------------------------------
+  suse:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.name }}:${{ matrix.version }}
+    strategy:
+      matrix:
+        include:
+          - { name: opensuse/leap,  version: 15.0,  python: python3 }
+          - { name: opensuse/leap,  version: 15.1,  python: python3 }
+          - { name: opensuse/leap,  version: 15.2,  python: python3 }
+          - { name: opensuse/leap,  version: 15.3,  python: python3 }
+          - { name: opensuse/leap,  version: 15.4,  python: python3 }
+          - { name: opensuse/leap,  version: 15.5,  python: python3 }
+
+    steps:
+    - name: Install dependencies
+      shell: bash 
+      run: zypper install -y ${{ matrix.python }}-pytest tar gzip
+
+    - name: Setup alternative symlink
+      if: matrix.python == 'python3'
+      shell: bash
+      run: >
+        update-alternatives
+        --install /usr/bin/python python 
+        /usr/bin/${{ matrix.python }}
+        10
+        
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Test ssh-restrict
+      shell: bash
+      run: ${{ matrix.python }} -m pytest test/test.py
+

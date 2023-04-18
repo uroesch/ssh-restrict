@@ -1,9 +1,9 @@
 # -----------------------------------------------------------------------------
-# Run test 
+# Run python compatibilty tests
 # Author: Urs Roesch https://github.com/uroesch
-# Version: 0.1.0
+# Version: 0.2.0
 # -----------------------------------------------------------------------------
-name: pytest_ssh-restrict
+name: python-compatibility
 
 on:
   push:
@@ -12,10 +12,10 @@ on:
   pull_request:
     branches:
     - master
-    - main 
+    - main
 
 jobs:
-  pytest_ssh-restrict:
+  python-compatibility:
     timeout-minutes: 15
     #runs-on: ${{ matrix.os }}
     runs-on: ubuntu-latest
